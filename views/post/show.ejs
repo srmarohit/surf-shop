@@ -1,0 +1,17 @@
+  <h4>Show Post...</h4>
+
+  <div> <h1><%= post.title %></h1></div>
+       <div>Price      : <%= post.price %>$</div>
+      <div>Description :<%= post.description %></div>
+       <div>
+             <% post.images.forEach(function(image){ %>
+                   <img src="<%= image.url %> " alt="Surf-image" width="200px"/>
+             <% }); %>
+         </div>
+      <div>Location    : <%= post.location %></div>
+      <a href="/posts/<%= post.id %>/edit">Edit</a>
+      <div>
+	<form action="/posts/<%= post.id %>?_method=DELETE" method="POST">
+		<input type="submit" value="Delete">
+	</form>
+</div>

@@ -1,0 +1,14 @@
+<% posts.forEach((post)=>{ %>
+
+        <div> <h1><%= post.title %></h1></div>
+        <div>
+             <% post.images.forEach(function(image){ %>
+                   <img src="<%= image.url %> " alt="Surf-image" width="200px"/>
+             <% }); %>
+         </div>
+       <div>Price      : <%= post.price %>$</div>
+      <div>Description :<%= post.description %></div>
+      <div>Location    : <%= post.location %></div>
+      <div><a href="/posts/<%= post.id %>">Read More</a></div>
+	
+<% });  %>

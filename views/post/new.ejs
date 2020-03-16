@@ -1,0 +1,12 @@
+<h1>New Post</h1>
+
+<form action="/posts" method="post" enctype="multipart/form-data">
+       <div>title      : <input type="text" name="post[title]"/></div>
+       <div>Price      : <input type="text" name="post[price]"/></div>
+      <div>Description :<textarea name="post[description]"></textarea></div>
+      <div>
+        <input type="file" accept="images/*" name="images" multiple />
+      </div>
+      <div>Location    : <input type="text" name="post[location]"/></div>
+       <input type="submit" value="Post" />
+</form>
