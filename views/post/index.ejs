@@ -1,4 +1,9 @@
-<% posts.forEach((post)=>{ %>
+
+<% layout('layout/boilerplate') -%>
+
+<% include ../layout/partials/post-paginate.ejs%>
+
+<% posts.docs.forEach((post)=>{ %>
 
         <div> <h1><%= post.title %></h1></div>
         <div>

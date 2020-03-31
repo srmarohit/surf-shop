@@ -5,7 +5,7 @@ const {asyncErrorHandler} = require('../middleware/index');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Surf-Shop  : Home' });
+  res.render('index', { title: 'Post Index' });
 });
 
 /* GET Ragister page. */

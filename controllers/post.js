@@ -1,5 +1,10 @@
 const Post = require('../models/post');
 const cloudinary = require('cloudinary');
+const mbxGeocoding = require('@mapbox/mapbox-sdk/services/geocoding');
+const geocodingClient = mbxGeocoding({ accessToken:'pk.eyJ1IjoicmRzMTEwNyIsImEiOiJjazd1cmp0OGQwMGJ3M29xcTZvNXJzd2w1In0.rKfyvZxH0N038Um5D_-WJQ' });
+  const request = require('request');
+
+
 cloudinary.config({
 	cloud_name :'nodeimg' ,
 	api_key : '757179596265731',
@@ -10,8 +15,12 @@ module.exports = {
 
 	//get Post
 	async getPosts(req,res,next){
-		let posts = await Post.find({});
-		res.render('post/index',{ posts });
+		let posts = await Post.paginate({},{
+			page : req.query.page || 1,
+			limit : 10 
+		});
+		posts.page = Number(posts.page);
+		res.render('post/index',{ posts, title: 'Posts Index' });
 	},
           
           // new Post
@@ -23,6 +32,8 @@ module.exports = {
 	 async createPost(req,res,next){
 	 	//use req.body to create a new Post
 	 	      req.body.post.images = [] ;
+	 	      req.body.post.coordinates = [] ;
+
 	 	       for(const file of req.files){
                   let image = await cloudinary.v2.uploader.upload(file.path);
                      req.body.post.images.push({
@@ -30,15 +41,38 @@ module.exports = {
                   	    public_id :image.public_id
                     });
 	 	        }
+
+          let response = await geocodingClient
+		  .forwardGeocode({
+		    query: req.body.post.location,
+		    limit: 1
+		  })
+		  .send();
+		req.body.post.coordinates = response.body.features[0].geometry.coordinates;
+
+                 console.log( req.body.post.coordinates[0]);
             let post = await Post.create(req.body.post);
+            req.session.success = "Post created Successfully..!";
             res.redirect(`/posts/${post.id}`);
 	 },
 
 	  //showPost
 
 	  async showPost(req,res,next){
-	  	let post = await Post.findById(req.params.id);
-	  	res.render('post/show',{post});
+	  	let post = await Post.findById(req.params.id).populate({
+	  		path :'reviews',
+	  		options :{sort : {'_id':-1} },
+             populate :{
+             	         path:'author',
+             	          model:'User'
+                     }
+	  			 });
+
+	  	 const avgFloorRating = post.calculateAvgRating(); 
+	  	let mapBoxToken = 'pk.eyJ1IjoicmRzMTEwNyIsImEiOiJjazd1cmp0OGQwMGJ3M29xcTZvNXJzd2w1In0.rKfyvZxH0N038Um5D_-WJQ';
+		res.render('post/show', { post, mapBoxToken, avgFloorRating });// pass avgfloorRating as local variable..
+             
+	  	//res.render('post/show',{post});
 	  },
 
 	   //editPost
@@ -73,10 +107,20 @@ module.exports = {
 	   	       	   }
 	   	       }
               
+      if(req.body.post.location !== post.location ){
+             let response = await geocodingClient.forwardGeocode({
+		        query: req.body.post.location,
+		         limit: 1
+		          }).send();
+
+	    	      post.coordinates = response.body.features[0].geometry.coordinates;
+                  post.location = req.body.post.location ;
+
+         }
+
                post.title = req.body.post.title ;
                post.price = req.body.post.price ;
                post.description = req.body.post.description;
-               post.location = req.body.post.location ;
 
 	   	       post.save();
 	   	  res.redirect(`/posts/${post.id}`);
@@ -89,6 +133,7 @@ module.exports = {
                   await cloudinary.v2.uploader.destroy(image.public_id);                   
 		      }
 		     await post.remove(); 
+		     		req.session.success = 'Post deleted successfully!';
 		   res.redirect('/posts');
 	} 
 }

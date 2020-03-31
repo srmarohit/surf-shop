@@ -1,3 +1,6 @@
+<% layout('layout/post-edit-layout') -%>
+
+
 <h1>Edit Post!</h1>
 
 <form id="postEditForm" action="/posts/<%= post.id %>?_method=PUT" method="POST" enctype="multipart/form-data">
@@ -21,17 +24,3 @@
 	<input type="submit" value="Update">
 </form>
 
-<script>
-	 let postEditForm = document.getElementById('postEditForm');
-	  postEditForm.addEventListener('submit',(e)=>{
-	  	  let uploadImage = document.getElementById('uploadImage').files.length;
-          let existingImage = document.querySelectorAll('.imageDeletion').length;
-          let deleteImage = document.querySelectorAll(".imageDeletion:checked").length;
-           let imageAmount = uploadImage + existingImage - deleteImage ; 
-              if(imageAmount > 4){
-              	   e.preventDefault();
-              	    let removeAmount = imageAmount - 4 ;
-              	   alert(` You need to delete  ${removeAmount} more image${removeAmount === 1 ? '':'s'} `);
-              } 
-	  });
-</script>
