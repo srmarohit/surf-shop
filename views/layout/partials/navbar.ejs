@@ -1,8 +1,28 @@
+<style>
+	ul{
+		list-style-type: none ;
+		margin: 0;
+		padding: 0;
+	}
+	li{
+		display: inline;
+		padding: 10px;
+	}
+</style>
 
-<nav>
-  		<ul>
+    
+  		<ul id="navBar">
   			<li><a href="/">Home</a></li>
-  			<li><a href="/posts/new">Create</a></li>
   			<li><a href="/posts/">Posts</a></li>
+
+  			 <% if(!currentUser){ %>
+               <li><a href="/register">SignIn</a></li>
+  			   <li><a href='/login'>LogIn</a></li>
+  			<% }else{ %>
+  			 <li><a href="/posts/new">Create</a></li>
+            <li><a href="/profile">Profile</a></li>
+  			 <li><a href="/logout">LogOut</a></li>
+  			 Hi, <%= currentUser.username %>
+  		<% } %>
   		</ul>
-  	</nav>
+  	

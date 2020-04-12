@@ -2,3 +2,11 @@
 
 <h1>Surf-Shop</h1>
     <p>Welcome to Surf-Shop</p>
+
+    <div id="map"></div>
+
+  <script>
+	mapboxgl.accessToken = "<%= MapboxToken %>";
+	var posts = { features: <%- JSON.stringify(posts) %> };
+</script>
+<script src="/javascripts/allPostsClusterMap.js"></script>

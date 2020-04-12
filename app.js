@@ -5,6 +5,7 @@ var express = require('express');
 var engine = require('ejs-mate');
 var mongoose = require('mongoose');
 var path = require('path');
+const favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
@@ -41,6 +42,7 @@ app.set('view engine', 'ejs');
 // set public assets directory
 app.use(express.static('public'));
 
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -71,13 +73,13 @@ passport.deserializeUser(User.deserializeUser());
       // apply middleware to use title of document..
 app.use(function(req,res,next){
 
-  req.user = {
+  //req.user = {
    // '_id':'5e7ce2d24523b921e1452abf',  //rohit
-       '_id':'5e81caa71c9d440000529d8e',  //rohite
-    'username':'rohite'
-  };
+//       '_id':'5e81caa71c9d440000529d8e',  //rohite
+  //  'username':'rohite'
+ //};
 
-  res.locals.currentUser = req.user ;
+ res.locals.currentUser = req.user ;
    res.locals.title = "Surf-Shop"; // set title  
           // Use Flash Message..
        res.locals.success = req.session.success || '';

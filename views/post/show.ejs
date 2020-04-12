@@ -34,15 +34,16 @@
 
         <div id='map'></div>
 
+<% if(currentUser && post.author.equals(currentUser._id)){ %>
       <a href="/posts/<%= post.id %>/edit">Edit</a>
       <div>
 	<form action="/posts/<%= post.id %>?_method=DELETE" method="POST">
     <input type="submit" value="Delete">
   </form>
 </div>
+<% } %>
 
-
- 
+<% if(currentUser){ %> 
 <h2>Create a Review</h2>
 <form action="/posts/<%= post.id %>/reviews" method="POST">
   <textarea name="review[body]" required></textarea>
@@ -62,6 +63,10 @@
 </fieldset>
   <input type="submit" value="submit">
 </form>
+<% } else { %>
+      <a href="/login?returnTo=true">Create a Review</a>
+<% } %>
+
 
 <h3>Reviews</h3>
 <!-- display all reviews -->
@@ -73,7 +78,7 @@
   </div>
 
 
-<% if(review.author.equals(currentUser._id)){ %> 
+<% if(currentUser && review.author.equals(currentUser._id)){ %> 
 <div>
      <button class="review-edit-button">Edit</button>
      <form class="edit-review-form" action="/posts/<%= post.id %>/reviews/<%= review.id %>?_method=PUT" method="post">

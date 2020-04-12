@@ -5,18 +5,39 @@ const Schema = mongoose.Schema;
 
 const postSchema = new Schema({
 	  title : String,
+	
 	  price :String,
+	
 	  description :String,
+	
 	  images : [
 	             {url:String,
                    public_id:String
 	            }],
+	
 	  location: String,
-	 coordinates :Array,
-	  author: {
+	
+	  geometry:{
+	  	  type:{
+	  	  	  type:String,
+	  	  	  enum:['Point'],
+	  	  	  required:true
+	  	  },
+	  	 coordinates :{
+	  	 	type : [Number],
+	  	 	required : true 
+	  	 } 
+	  },
+	
+	 properties : {
+	 	 description :String
+	 },
+
+	 author: {
 		type: Schema.Types.ObjectId,
 		ref: 'User'
 	   },
+
 	reviews: [
 		{
 			type: Schema.Types.ObjectId,

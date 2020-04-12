@@ -1,0 +1,13 @@
+<% layout('layout/boilerplate') -%>
+
+<h1>Forgot Password </h1>
+
+<form action="/forgot-password?_method=PUT" method="POST">
+	<div>
+		<label for="email">Enter Email to send Validation Link</label>
+		<input type="text" name="email" id="email">
+	</div>
+   <div>
+   	<input type="submit" value="send">
+   </div>
+</form>

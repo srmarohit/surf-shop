@@ -1,15 +1,9 @@
 const Post = require('../models/post');
-const cloudinary = require('cloudinary');
+const { cloudinary } = require('../cloudinary');
 const mbxGeocoding = require('@mapbox/mapbox-sdk/services/geocoding');
 const geocodingClient = mbxGeocoding({ accessToken:'pk.eyJ1IjoicmRzMTEwNyIsImEiOiJjazd1cmp0OGQwMGJ3M29xcTZvNXJzd2w1In0.rKfyvZxH0N038Um5D_-WJQ' });
   const request = require('request');
 
-
-cloudinary.config({
-	cloud_name :'nodeimg' ,
-	api_key : '757179596265731',
-	api_secret : process.env.CLOUDINARY_SECRET
-});
 
 module.exports = {
 
@@ -17,10 +11,14 @@ module.exports = {
 	async getPosts(req,res,next){
 		let posts = await Post.paginate({},{
 			page : req.query.page || 1,
-			limit : 10 
+			limit : 10 ,
+			sort : {_id:'-1'}       // latest posts show first.. -1 is for desc.
 		});
 		posts.page = Number(posts.page);
-		res.render('post/index',{ posts, title: 'Posts Index' });
+		res.render('post/index',{ posts, 
+			MapboxToken:process.env.MAPBOX_TOKEN,
+			title: 'Posts Index' 
+		});
 	},
           
           // new Post
@@ -32,13 +30,12 @@ module.exports = {
 	 async createPost(req,res,next){
 	 	//use req.body to create a new Post
 	 	      req.body.post.images = [] ;
-	 	      req.body.post.coordinates = [] ;
+	 	     // req.body.post.coordinates = [] ;
 
 	 	       for(const file of req.files){
-                  let image = await cloudinary.v2.uploader.upload(file.path);
                      req.body.post.images.push({
-                  	    url : image.secure_url ,
-                  	    public_id :image.public_id
+                  	    url : file.secure_url ,
+                  	    public_id :file.public_id
                     });
 	 	        }
 
@@ -48,10 +45,16 @@ module.exports = {
 		    limit: 1
 		  })
 		  .send();
-		req.body.post.coordinates = response.body.features[0].geometry.coordinates;
+		req.body.post.geometry = response.body.features[0].geometry;
+		    req.body.post.author = req.user._id ;  // set user id to author
 
-                 console.log( req.body.post.coordinates[0]);
+                // console.log( req.body.post.coordinates[0]);
             let post = await Post.create(req.body.post);
+            post.properties.description = `<strong><a href='/posts/${post.id}'>
+                         ${post.title}
+                         </a></strong>
+                         <p>${post.location}</p>
+                         <p>${post.description.substring(0,20)}....</p>`;
             req.session.success = "Post created Successfully..!";
             res.redirect(`/posts/${post.id}`);
 	 },
@@ -77,13 +80,15 @@ module.exports = {
 
 	   //editPost
 	   async editPost(req,res,next){
-	   	   let post = await Post.findById(req.params.id);
-	   	   res.render('post/edit',{post});
+	   	//   let post = await Post.findById(req.params.id); // no needed due store post in res.locals.post
+	   	   res.render('post/edit');
 	   },
 
 	   //updatePost
 	   async updatePost(req,res,next){
-	   	  let post = await Post.findById(req.params.id);
+	   	 //  let post = await Post.findById(req.params.id);
+	   	 //take post from destucturing res.locals 
+	   	 const {post} = res.locals ;
 	   	     if(req.body.deleteImages && req.body.deleteImages.length ){
 	   	     	 let deleteImages = req.body.deleteImages ;
 	   	     	  for(const public_id of deleteImages){
@@ -99,10 +104,9 @@ module.exports = {
 
 	   	       if(req.files){
 	   	       	   for(const file of req.files){
-                        let image = await cloudinary.v2.uploader.upload(file.path);
                      post.images.push({
-                  	    url : image.secure_url ,
-                  	    public_id :image.public_id
+                  	    url : file.secure_url ,
+                  	    public_id :file.public_id
                     });
 	   	       	   }
 	   	       }
@@ -122,13 +126,20 @@ module.exports = {
                post.price = req.body.post.price ;
                post.description = req.body.post.description;
 
-	   	       post.save();
+                post.properties.description = `<strong><a href='/posts/${post.id}'>
+                         ${post.title}
+                         </a></strong>
+                         <p>${post.location}</p>
+                         <p>${post.description.substring(0,20)}...</p>` ;
+
+	   	     await post.save();
 	   	  res.redirect(`/posts/${post.id}`);
 	   },
 
 	          // Posts Destroy
 	   async deletePost(req, res, next) {
-		    let post =  await Post.findById(req.params.id);
+		    //let post =  await Post.findById(req.params.id);
+		    	   	 const {post} = res.locals ; // By destructuring res.locals 
 		      for(const image of post.images){
                   await cloudinary.v2.uploader.destroy(image.public_id);                   
 		      }
